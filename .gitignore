@@ -1,0 +1,17 @@
+/*
+!/.gitignore
+!/README.md
+!/LICENSE
+!/knowledge-router/
+!/distill-onepager/
+!/docs-to-knowledge/
+!/fact-freshness-check/
+!knowledge-router/**
+!distill-onepager/**
+!docs-to-knowledge/**
+!fact-freshness-check/**
+__pycache__/
+*.pyc
+.skill-state/
+.DS_Store
+Thumbs.db
