@@ -49,6 +49,17 @@ CJK-equivalent units = Chinese characters + English words × 1.6. One A4 page �
 - 9pt minimum, inline SVG diagrams, no CDN or JavaScript dependency for the printable document.
 - Editorial QA gate: section contracts, glossary/MECE, cold-reader review, and sibling-heading collision checks.
 
+## Output naming（输出命名）
+
+All generated files use Chinese names:
+
+- `浓缩-<中文主题>.html`
+- `知识-<中文主题>.html`
+- `知识图谱-<中文主题>.html`
+- `时效校验-<中文主题>.md`
+
+主题用 2–12 个中文字概括；不使用英文 slug、拼音或日期缩写。用户显式指定路径时以用户为准，但文件名仍建议中文。
+
 ## Install
 
 Keep the four skill directories side by side. `docs-to-knowledge` and `fact-freshness-check` reuse reference files from `distill-onepager`.

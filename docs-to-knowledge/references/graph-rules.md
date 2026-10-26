@@ -49,10 +49,10 @@
 生成命令（必须 --offline）：
 
 ```bash
-npx -y markmap-cli --offline --no-open -o knowledge-map-<slug>.html map-src.md
+npx -y markmap-cli --offline --no-open -o 知识图谱-<中文主题>.html map-src.md
 ```
 
-产物自检：`grep -c 'src="http' knowledge-map-<slug>.html` 必须为 0（xmlns 命名空间不算）。
+产物自检：`grep -c 'src="http' 知识图谱-<中文主题>.html` 必须为 0（xmlns 命名空间不算）。
 
 ## 5. 文档内 SVG 子图
 
