@@ -47,6 +47,7 @@ CJK-equivalent units = Chinese characters + English words × 1.6. One A4 page �
 - Single-file HTML, A4, print-ready; no PDF/DOCX generation.
 - `distill-onepager`: 1–2 pages; `docs-to-knowledge`: 3–6 pages plus a markmap graph.
 - 9pt minimum, inline SVG diagrams, no CDN or JavaScript dependency for the printable document.
+- Footer is optional: if the body already fits the page and only the footer slightly overflows, drop the footer instead of adding a page or shrinking text.
 - Editorial QA gate: section contracts, glossary/MECE, cold-reader review, and sibling-heading collision checks.
 
 ## Output naming（输出命名）
