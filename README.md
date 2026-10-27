@@ -15,7 +15,7 @@ flowchart LR
 ```
 
 - **knowledge-router** — the entry point. Quantifies the input (CJK-equivalent size, H2 subtopics, file count) and routes to one output skill. It also enforces freshness verification and the editorial QA gate.
-- **distill-onepager** — hard compression: a single document into 1–2 A4 pages, with a strict character budget, KU scoring, a compression ladder, and one or two mechanism diagrams.
+- **distill-onepager** — hard compression: a single document into 1–2 A4 pages, with a strict character budget, KU scoring, a compression ladder, and one or two mechanism diagrams. The page tier is driven by the number of high-scoring KUs (not by source length); skeletons — peer enumerations, decision chains, quotable scripts — are protected from silent deletion, and a replay test plus assertion-completeness check gate the output.
 - **docs-to-knowledge** — structured aggregation: a lead document plus N detail files into 3–6 A4 pages plus a self-contained markmap knowledge graph. It preserves key explanations, quotes, numbers, and honest caveats instead of maximizing compression.
 - **fact-freshness-check** — version-freshness audit: extracts version-sensitive claims (defaults, limits, performance conclusions, support ranges, deprecations), checks the current official docs, and returns four states: still valid, evolved, incomplete, unverified. The body is rewritten to the current behavior; the freshness block records the evolution path.
 
