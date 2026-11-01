@@ -19,6 +19,7 @@ BUDGET = {1: 900, 2: 1700}  # CJK chars, includes ~12% headroom over the target
 MIN_PT = 9.0
 FRESH_INLINE_MAX = 4   # freshness-rules.md: inline block <= 4 items
 FRESH_PAGE_MAX = 12    # freshness-rules.md: appendix page <= 12 rows
+GLOSSARY_PAGE_MAX = 12 # glossary appendix (page--glossary): <= 12 rows
 
 # Abstract words that make two headings look like the same topic.
 # Shared, unqualified use of one of these is flagged for editorial review.
@@ -110,9 +111,14 @@ def main(path: str) -> int:
     fresh_inline_items = sum(
         len(re.findall(r"<li\b", b, flags=re.I)) for b in fresh_blocks)
 
+    # --- glossary appendix (page--glossary): exempt from page/char budget ---
+    glossary_appendix = extract_all(body, "page--glossary", wrapper=r"<section\b")
+    glossary_rows = sum(
+        max(0, len(re.findall(r"<tr\b", b, flags=re.I)) - 1) for b in glossary_appendix)
+
     # --- main content = everything except freshness parts ---
     without_fresh = body
-    for b in fresh_appendix + fresh_blocks:
+    for b in fresh_appendix + fresh_blocks + glossary_appendix:
         without_fresh = without_fresh.replace(b, " ")
 
     text = visible_text(without_fresh)
@@ -189,6 +195,11 @@ def main(path: str) -> int:
             f"改用附录页形态 B")
     if fresh_page_count and fresh_items > FRESH_PAGE_MAX:
         errors.append(f"时效附录页 {fresh_items} 条，超过上限 {FRESH_PAGE_MAX}，回到分级收紧")
+    if glossary_rows > GLOSSARY_PAGE_MAX:
+        errors.append(
+            f"术语附录页 {glossary_rows} 行，超过上限 {GLOSSARY_PAGE_MAX}，回到筛选收紧")
+    if len(glossary_appendix) > 1:
+        errors.append("术语附录页超过 1 页，只保留一页（合并或删低价值条目）")
     if fresh_html:
         if not re.search(r"核实", fresh_html):
             errors.append("时效区块首行缺少“核实”字样（契约要求注明核实日期）")
@@ -204,11 +215,13 @@ def main(path: str) -> int:
 
     print("== distill-onepager check ==")
     print(f"file         : {path}")
-    print(f"pages        : {pages} (+{fresh_page_count} freshness appendix)")
+    print(f"pages        : {pages} (+{fresh_page_count} freshness appendix, "
+          f"+{len(glossary_appendix)} glossary appendix)")
     print(f"cjk chars    : {cjk} (budget {BUDGET.get(pages, 'n/a')}, freshness {fresh_chars} exempt)")
     print(f"ascii words  : {words}")
     print(f"svg / table  : {svgs} / {tables}")
     print(f"freshness    : {fresh_items} item(s), {fresh_chars} chars")
+    print(f"glossary     : {glossary_rows} row(s), exempt")
     print(f"min font     : {min_font if min_font is not None else 'unknown'} pt")
     print(f"external     : {len(external)}")
     print()

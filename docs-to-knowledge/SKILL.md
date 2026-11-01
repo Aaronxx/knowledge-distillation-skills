@@ -49,7 +49,7 @@ last_updated: "2026-10-26"
 4. **页面规划**：按图谱聚类分配页面——第 1 页总览，中间每页一个模块或接缝组，末页交叉索引与遗留清单。细节按优先级排序，同页放不下的挪后页，不许丢。
 5. **编辑契约（强制）**：为总览页、每个主题页、附录页填「页面契约 + 术语表」，跑 MECE 测试；写完后做冷读者复审。详见 `distill-onepager/references/editorial-qa.md`。
 6. **成稿**：按"保留规则"取舍；每条细节压缩成 2–4 行卡片，但关键说明原样保留。
-7. **图谱渲染**：跑 markmap-cli 生成交互图谱；文档内嵌图手写 SVG（`distill-onepager/references/diagram-playbook.md` 的骨架）。
+7. **图谱渲染**：跑 markmap-cli 生成交互图谱；文档内嵌图手写 SVG（`onepager-render/references/diagram-playbook.md` 的骨架）。
 8. **时效校验（必选，用户明确说"不用校验"才跳过；由 knowledge-router 调用时同样强制）**：版本敏感断言按 `fact-freshness-check` 处理，正文只写当前版本事实；输入为项目自述且无外部技术断言时，报告写明"无版本敏感断言，未联网校验"。
 9. **自检**：跑 `python scripts/check_knowledge.py <file.html> [--map map.html]`，再过人工清单，最后做冷读者复审。
 

@@ -58,7 +58,7 @@ npx -y markmap-cli --offline --no-open -o 知识图谱-<中文主题>.html map-s
 
 - 主图（总览页）：模块为节点、依赖为边，≤15 节点，横向分层。
 - 子图（主题页）：该组机制的关键链路，≤10 节点。
-- 手写 SVG 骨架与样式约定见 `distill-onepager/references/diagram-playbook.md`（字体 ≥9pt、黑白可读、无外部依赖）。
+- 手写 SVG 骨架与样式约定见 `onepager-render/references/diagram-playbook.md`（字体 ≥9pt、黑白可读、无外部依赖）。
 - 图的 `aria-label` 必须写明"这张图回答什么问题"。
 
 ## 6. 交叉索引表（图谱的打印形态）

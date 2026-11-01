@@ -18,7 +18,7 @@
 | 1–4 条 | 形态 A：紧凑区块 | 每个正文页 footer 之前，`<div class="freshness">` |
 | 5–12 条 | 形态 B：附录页 | 文档末尾 `<section class="page page--freshness">`，标题「版本演进与出处」 |
 
-附录页**不计入** 1–2 页的知识点预算；check_onepager.py 按 `page--freshness` 类识别并豁免。
+附录页**不计入** 1–2 页的知识点预算；`onepager-render/scripts/check_onepager.py` 按 `page--freshness` 类识别并豁免。
 
 ## 2. 形态 A 模板
 
@@ -55,7 +55,7 @@
 </section>
 ```
 
-## 4. 样式约定（已内置于 assets/onepager.html）
+## 4. 样式约定（已内置于 `onepager-render/assets/onepager.html`）
 
 - 字号 9pt，行高 1.45，比正文视觉轻一档：左侧 1.2mm 竖线 + 浅底。
 - 判定标签用 `<strong>`，黑白打印靠文字本身区分，不靠颜色。
@@ -72,4 +72,5 @@
 | skill | 义务 |
 |---|---|
 | fact-freshness-check | 先完成正文动作（[演进] 回写、[表述不完整] 补限定词），再按 §2/§3 格式写区块；每条带出处与核实日期；写入后触发对方自检 |
-| distill-onepager | 保证正文只含当前版本事实；提供区块样式与附录页样式；check 脚本豁免并统计时效内容；交付报告里列出校验条数与四态分布 |
+| distill-onepager（编排者） | 保证正文只含当前版本事实；在第 7 步调用 fact-freshness-check；交付报告里列出校验条数与四态分布 |
+| onepager-render（排版） | 提供区块与附录页样式；check 脚本豁免并单独统计时效内容 |

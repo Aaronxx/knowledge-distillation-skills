@@ -89,7 +89,7 @@ The router reports: input summary → quantified decision → selected skill →
 ## Verification
 
 - `knowledge-router/scripts/test_router.py`: 9/9 routing regressions.
-- `distill-onepager/scripts/check_onepager.py`: page count, character budget, font floor, external resources, freshness block, heading collisions.
+- `onepager-render/scripts/check_onepager.py`: page count, character budget, font floor, external resources, freshness block, heading collisions.
 - `docs-to-knowledge/scripts/check_knowledge.py`: page count, per-page budget, detail-card coverage, honest markers, markmap self-containment, heading collisions.
 - Audit the skills themselves with [skill-authoring-standard](https://github.com/Aaronxx/skill-authoring-standard): `python scripts/audit_skill.py <skill_dir>`.
 
@@ -98,6 +98,7 @@ The router reports: input summary → quantified decision → selected skill →
 ```text
 knowledge-router/
 distill-onepager/
+onepager-render/
 docs-to-knowledge/
 fact-freshness-check/
 README.md
@@ -108,14 +109,15 @@ Each skill directory contains `SKILL.md`, `assets/`, `references/`, `scripts/` (
 
 ## 中文说明
 
-四个 skill 组成一条知识浓缩流水线：
+五个 skill 组成一条知识浓缩流水线：
 
 - `knowledge-router`：按输入规模自动选择压缩还是结构化，并强制跑时效校验与编辑质量门。
-- `distill-onepager`：单文档 → 1–2 页 A4 知识点，硬预算、强取舍。
+- `distill-onepager`：单文档 → 1–2 页 A4 知识点，硬预算、强取舍；编排 `onepager-render`（排版）与 `fact-freshness-check`（校验）。
+- `onepager-render`：把已定型内容渲染成 1–2 页 A4 打印级 HTML，负责版式、分页、图示与结构自检；也可单独使用。
 - `docs-to-knowledge`：总纲 + 细节集 → 3–6 页结构化知识 + 可交互 markmap 图谱，保留关键说明、话术和诚实标记。
-- `fact-freshness-check`：版本敏感断言逐条对照官方当前版文档，正文写当前事实，区块记演进脉络。
+- `fact-freshness-check`：版本敏感断言逐条对照官方当前版文档，正文写当前事实，区块记演进脉络；也可单独使用。
 
-安装时四个目录必须放在同一层；`docs-to-knowledge` 和 `fact-freshness-check` 会复用 `distill-onepager` 的参考文件。
+安装时五个目录必须放在同一层；`docs-to-knowledge`、`distill-onepager` 与 `fact-freshness-check` 会复用 `onepager-render` 的参考文件与校验脚本。
 
 ## License
 
