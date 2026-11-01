@@ -112,8 +112,8 @@ Each skill directory contains `SKILL.md`, `assets/`, `references/`, `scripts/` (
 五个 skill 组成一条知识浓缩流水线：
 
 - `knowledge-router`：按输入规模自动选择压缩还是结构化，并强制跑时效校验与编辑质量门。
-- `distill-onepager`：单文档 → 1–2 页 A4 知识点，硬预算、强取舍；编排 `onepager-render`（排版）与 `fact-freshness-check`（校验）。
-- `onepager-render`：把已定型内容渲染成 1–2 页 A4 打印级 HTML，负责版式、分页、图示与结构自检；也可单独使用。
+- `distill-onepager`：单文档 → 1–3 页 A4 知识点（默认 1–2 页，图片载荷或结构断裂时可弹性到 3 页），硬预算、强取舍、保留必要原文图片；编排 `onepager-render`（排版）与 `fact-freshness-check`（校验）。
+- `onepager-render`：把已定型内容渲染成 1–3 页 A4 打印级 HTML，负责版式、分页、图示、原图 base64 内嵌与结构自检；也可单独使用。
 - `docs-to-knowledge`：总纲 + 细节集 → 3–6 页结构化知识 + 可交互 markmap 图谱，保留关键说明、话术和诚实标记。
 - `fact-freshness-check`：版本敏感断言逐条对照官方当前版文档，正文写当前事实，区块记演进脉络；也可单独使用。
 

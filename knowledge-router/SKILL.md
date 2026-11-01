@@ -1,6 +1,6 @@
 ---
 name: knowledge-router
-description: 知识整理总入口：对任意输入（一个链接、一个文档、多个文档/目录）自动路由到 distill-onepager（1–2 页硬压缩）或 docs-to-knowledge（3–6 页结构化知识+图谱），并强制执行 fact-freshness-check 知识校验。触发词：帮我整理知识、这个链接总结一下、这些文档整理成、浓缩（没说几页时）、知识整理、自动选择方式。不适用于：用户已点名下游 skill、只要求校验、输入无文本。
+description: 知识整理总入口：对任意输入（一个链接、一个文档、多个文档/目录）自动路由到 distill-onepager（1–3 页弹性压缩，默认 1–2 页）或 docs-to-knowledge（3–6 页结构化知识+图谱），并强制执行 fact-freshness-check 知识校验。触发词：帮我整理知识、这个链接总结一下、这些文档整理成、浓缩（没说几页时）、知识整理、自动选择方式。不适用于：用户已点名下游 skill、只要求校验、输入无文本。
 user-invocable: true
 version: "1.1.0"
 last_updated: "2026-10-26"
@@ -54,7 +54,7 @@ last_updated: "2026-10-26"
 |---|---|---|
 | 单个链接 | 任何 | 先安全校验并拉取成单文档 → 再按单文档规则 |
 | 单文档 | ≤850 | `distill-onepager`（1 页） |
-| 单文档 | 851–3000 | `distill-onepager`（1–2 页，默认 2；内容单薄可 1） |
+| 单文档 | 851–3000 | `distill-onepager`（1–2 页，默认 2；内容单薄可 1；有必保留图可到 3） |
 | 单文档 | 3001–8000，H2 ≤4 | `distill-onepager`（2 页） |
 | 单文档 | 3001–8000，H2 ≥5 | `docs-to-knowledge`（3–4 页） |
 | 单文档 | >8000 | `docs-to-knowledge`（4–6 页） |

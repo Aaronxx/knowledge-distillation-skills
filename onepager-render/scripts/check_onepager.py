@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Check a distill-onepager HTML file against the 1-2 page budget.
+"""Check a onepager-render HTML file against the 1-3 page budget.
 
 Usage:
     python check_onepager.py <file.html>
@@ -15,11 +15,14 @@ import re
 import sys
 from pathlib import Path
 
-BUDGET = {1: 900, 2: 1700}  # CJK chars, includes ~12% headroom over the target
+BUDGET = {1: 900, 2: 1700, 3: 2600}  # CJK chars, ~12% headroom over 800/1600/2400
 MIN_PT = 9.0
 FRESH_INLINE_MAX = 4   # freshness-rules.md: inline block <= 4 items
 FRESH_PAGE_MAX = 12    # freshness-rules.md: appendix page <= 12 rows
 GLOSSARY_PAGE_MAX = 12 # glossary appendix (page--glossary): <= 12 rows
+IMG_MAX_BYTES = 400 * 1024        # single embedded image
+IMG_TOTAL_MAX_BYTES = 2 * 1024 * 1024   # all embedded images
+FILE_MAX_BYTES = 3 * 1024 * 1024  # whole HTML file
 
 # Abstract words that make two headings look like the same topic.
 # Shared, unqualified use of one of these is flagged for editorial review.
@@ -130,6 +133,21 @@ def main(path: str) -> int:
     tables = len(re.findall(r"<table\b", without_fresh, flags=re.I))
     imgs = len(re.findall(r"<img\b", without_fresh, flags=re.I))
 
+    # --- embedded images (contract: references/html-spec.md §6) ---
+    img_tags = re.findall(r"<img\b[^>]*>", without_fresh, flags=re.I)
+    data_imgs = [t for t in img_tags
+                 if re.search(r'src\s*=\s*["\']data:image/', t, flags=re.I)]
+    ext_imgs = [t for t in img_tags
+                if re.search(r'src\s*=\s*["\'](?:https?:)?//', t, flags=re.I)]
+    missing_alt = [t for t in img_tags
+                   if not re.search(r'\balt\s*=\s*["\'][^"\']+', t, flags=re.I)]
+    img_bytes = []
+    for t in data_imgs:
+        m = re.search(r'base64,([^"\']+)', t)
+        if m:
+            img_bytes.append(len(m.group(1)) * 3 // 4)
+    embedded_bytes = sum(img_bytes)
+
     font_sizes = [float(x) for x in re.findall(
         r"font-size\s*:\s*([0-9.]+)\s*pt", raw, flags=re.I)]
     min_font = min(font_sizes) if font_sizes else None
@@ -147,8 +165,8 @@ def main(path: str) -> int:
     errors = []
     warnings = []
 
-    if pages not in (1, 2):
-        errors.append(f"正文页数必须是 1 或 2，当前为 {pages}（附录页已单独统计）")
+    if pages not in (1, 2, 3):
+        errors.append(f"正文页数必须是 1、2 或 3，当前为 {pages}（附录页已单独统计）")
     if cjk == 0:
         errors.append("没有检测到中文正文，确认文件内容是否正确")
     if pages in BUDGET and cjk > BUDGET[pages]:
@@ -171,14 +189,40 @@ def main(path: str) -> int:
         errors.append("存在 position: fixed，打印会重复或错位")
     if vh:
         warnings.append("存在 vh 单位，打印尺寸不稳定")
-    if imgs:
-        warnings.append(f"存在 {len(imgs)} 个 <img>，确认图片会随 HTML 一起交付；优先内联 SVG")
+    if ext_imgs:
+        errors.append(f"存在 {len(ext_imgs)} 张外链图片，离线打印会白图；改为 base64 内嵌")
+    if missing_alt:
+        errors.append(f"存在 {len(missing_alt)} 张图片缺少非空 alt，必须写“这张图回答什么问题”")
+    if img_bytes and max(img_bytes) > IMG_MAX_BYTES:
+        over = max(img_bytes) / 1024
+        warnings.append(
+            f"单张内嵌图约 {over:.0f}KB，超过 {IMG_MAX_BYTES // 1024}KB 上限；"
+            f"请降采样（长边 1600px、JPEG q85）后再内嵌")
+    if embedded_bytes > IMG_TOTAL_MAX_BYTES:
+        errors.append(
+            f"内嵌图片合计约 {embedded_bytes / 1024 / 1024:.1f}MB，超过 "
+            f"{IMG_TOTAL_MAX_BYTES // 1024 // 1024}MB 上限；删图或降采样")
+    if imgs and not data_imgs and not ext_imgs:
+        warnings.append(f"存在 {imgs} 个 <img> 但未检测到 data:image，确认图片是否真的内嵌")
     if placeholders:
         errors.append(f"还有 {len(placeholders)} 个未替换的 {{{{占位符}}}}")
-    if pages == 1 and svgs + tables > 2:
-        warnings.append("1 页内图+表超过 2 个，检查是否过密")
-    if pages == 2 and svgs + tables > 4:
-        warnings.append("2 页内图+表超过 4 个，检查是否过密")
+    figures = svgs + imgs
+    if pages == 1 and figures + tables > 2:
+        warnings.append("1 页内图（SVG＋原图）+表超过 2 个，检查是否过密")
+    if pages == 2 and figures + tables > 4:
+        warnings.append("2 页内图（SVG＋原图）+表超过 4 个，检查是否过密")
+    if pages == 3 and figures + tables > 6:
+        warnings.append("3 页内图（SVG＋原图）+表超过 6 个，检查是否过密")
+    if pages == 3 and imgs == 0 and svgs == 0:
+        warnings.append("3 页档没有图：确认升页理由成立（应为结构断裂/图片载荷/记忆量），否则回 2 页")
+    try:
+        file_size = Path(path).stat().st_size
+        if file_size > FILE_MAX_BYTES:
+            warnings.append(
+                f"文件约 {file_size / 1024 / 1024:.1f}MB，超过 {FILE_MAX_BYTES // 1024 // 1024}MB；"
+                f"检查图片是否未压缩")
+    except OSError:
+        pass
 
     # --- editorial: heading collision ---
     for a, b, shared in heading_collisions(extract_headings(without_fresh)):
@@ -213,13 +257,15 @@ def main(path: str) -> int:
     elif fresh_items == 0:
         print("[NOTE] 未包含时效区块；若主题含版本敏感断言，建议跑 fact-freshness-check")
 
-    print("== distill-onepager check ==")
+    print("== onepager-render check ==")
     print(f"file         : {path}")
     print(f"pages        : {pages} (+{fresh_page_count} freshness appendix, "
           f"+{len(glossary_appendix)} glossary appendix)")
     print(f"cjk chars    : {cjk} (budget {BUDGET.get(pages, 'n/a')}, freshness {fresh_chars} exempt)")
     print(f"ascii words  : {words}")
     print(f"svg / table  : {svgs} / {tables}")
+    print(f"img          : {imgs} ({len(data_imgs)} embedded, "
+          f"{embedded_bytes / 1024:.0f}KB)")
     print(f"freshness    : {fresh_items} item(s), {fresh_chars} chars")
     print(f"glossary     : {glossary_rows} row(s), exempt")
     print(f"min font     : {min_font if min_font is not None else 'unknown'} pt")

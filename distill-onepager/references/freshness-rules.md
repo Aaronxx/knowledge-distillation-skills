@@ -18,7 +18,7 @@
 | 1–4 条 | 形态 A：紧凑区块 | 每个正文页 footer 之前，`<div class="freshness">` |
 | 5–12 条 | 形态 B：附录页 | 文档末尾 `<section class="page page--freshness">`，标题「版本演进与出处」 |
 
-附录页**不计入** 1–2 页的知识点预算；`onepager-render/scripts/check_onepager.py` 按 `page--freshness` 类识别并豁免。
+附录页**不计入** 1–3 页的知识点预算；`onepager-render/scripts/check_onepager.py` 按 `page--freshness` 类识别并豁免。
 
 ## 2. 形态 A 模板
 
