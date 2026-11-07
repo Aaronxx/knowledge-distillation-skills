@@ -82,6 +82,14 @@ last_updated: "2026-11-01"
 
 ### 3. 必须实测，不许目测
 
+一条命令即可完成下面 1–4 步（已有实现，勿再手写注入脚本）：
+
+```bash
+python <distill-onepager>/scripts/measure_fill.py <file.html> --pdf
+```
+
+它会把每页 `contentBottom` / 填充率 / 是否过 900px 门槛打出来，并顺带用 `--print-to-pdf` 数出实际打印页数；非末页低于门槛时退出码为 1。手写回归时的等价步骤：
+
 1. 注入量测脚本（`<script>` 计算每个 `.page` 内除 `.footer` 外子元素的 `bottom`，把结果写入 `#MEASURE` 的 `<pre>`）。
 2. 无 Python 环境下用 Chrome 无头取量测结果：
    `chrome --headless=new --virtual-time-budget=4000 --dump-dom "file:///<temp.html>"`，从 DOM 里读 `MEASURE::` 行。
@@ -93,7 +101,7 @@ last_updated: "2026-11-01"
 
 - 单文件 UTF-8、内联 CSS、除系统字体外无外部依赖。
 - `@page { size: A4; margin: 0 }`；每个 `.page` 固定 A4，页间 `break-after: page`。
-- 正文 10pt / 行高 1.55；最小 9pt；h1 17pt、h2 11.5pt。
+- 正文 10pt / 行高 1.55；最小 9pt；h1 17pt、h2 9pt（`assets/onepager.html` 为准——h2 是小节眉标而非视觉层级标题，之前此处误写 11.5pt，照写会撑大版面密度、把两页内容顶成三页）。
 - 打印保留背景：`print-color-adjust: exact`。
 - 卡片、图、表加 `break-inside: avoid`；标题加 `break-after: avoid` 防孤行。
 - 禁用：`position: fixed`、`vh`、`<details>`、hover 才可见的内容。
