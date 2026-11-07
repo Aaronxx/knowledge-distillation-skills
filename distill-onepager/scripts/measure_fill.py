@@ -21,7 +21,8 @@ import html as html_mod
 import json
 import os
 import re
-import subprocess
+# Launches the local browser only: fixed argv shape, shell never used.
+import subprocess  # nosec B404
 import sys
 import tempfile
 from pathlib import Path
@@ -96,7 +97,8 @@ def dump_dom(browser_path: str, workdir: str) -> str:
     page_uri = (Path(workdir) / "measure.html").as_uri()
     if not page_uri.startswith("file:///"):
         raise ValueError("refusing non-local URI")
-    proc = subprocess.run(
+    # argv is a literal list; only validated paths are interpolated, shell=False.
+    proc = subprocess.run(  # nosec B603
         [browser_path, "--headless=new", "--disable-gpu", "--no-first-run",
          "--no-default-browser-check", "--hide-scrollbars",
          "--force-device-scale-factor=1", "--virtual-time-budget=5000",
@@ -117,7 +119,8 @@ def print_pdf(browser_path: str, workdir: str):
     page_uri = (Path(workdir) / "measure.html").as_uri()
     if not page_uri.startswith("file:///"):
         raise ValueError("refusing non-local URI")
-    subprocess.run(
+    # argv is a literal list; the PDF name is a fixed relative path.
+    subprocess.run(  # nosec B603
         [browser_path, "--headless=new", "--disable-gpu", "--no-first-run",
          "--no-default-browser-check", "--print-to-pdf=out.pdf",
          "--no-pdf-header-footer", page_uri],

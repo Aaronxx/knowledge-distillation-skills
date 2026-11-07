@@ -19,20 +19,31 @@ Exit codes: 0 = all gates passed, 1 = at least one failed, 2 = could not run.
 """
 
 import argparse
-import importlib.util
 import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 SKILLS = HERE.parents[1]
-RENDER_CHECK = SKILLS / "onepager-render" / "scripts" / "check_onepager.py"
+RENDER_SCRIPTS = SKILLS / "onepager-render" / "scripts"
 
+# Static imports (no importlib): keeps the call graph resolvable for static
+# analysers, which otherwise report "dynamic dispatch" and refuse a verdict.
+sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(RENDER_SCRIPTS))
 
-def load(path: Path, name: str):
-    spec = importlib.util.spec_from_file_location(name, path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
+try:
+    import check_weight
+    import measure_fill
+except ImportError as exc:  # pragma: no cover - packaging guard
+    sys.stderr.write(f"[FAIL] sibling script missing: {exc}\n")
+    raise SystemExit(2)
+
+try:
+    import check_onepager as render_check
+    HAVE_RENDER_CHECK = True
+except ImportError:
+    render_check = None
+    HAVE_RENDER_CHECK = False
 
 
 def main() -> int:
@@ -53,20 +64,18 @@ def main() -> int:
     results = []
 
     # 1. structure
-    if RENDER_CHECK.is_file():
+    if HAVE_RENDER_CHECK:
         try:
-            structural = load(RENDER_CHECK, "render_check")
-            code = structural.main(str(target))
+            code = render_check.main(str(target))
             results.append(("structure", code == 0, "check_onepager.py"))
         except Exception as e:                      # noqa: BLE001 - report, do not crash
             results.append(("structure", False, f"error: {e}"))
     else:
-        results.append(("structure", False, f"missing {RENDER_CHECK}"))
+        results.append(("structure", False, f"missing {RENDER_SCRIPTS / 'check_onepager.py'}"))
 
     # 2. weight conservation
     try:
-        weight = load(HERE / "check_weight.py", "check_weight")
-        w = weight.check(target, args.manifest)
+        w = check_weight.check(target, args.manifest)
         ok = w["code"] == 0
         note = "no manifest (skipped)" if w["code"] == 2 else (
             f"{len(w['violations'])} violation(s)")
@@ -86,8 +95,7 @@ def main() -> int:
         results.append(("fill", True, "skipped (--no-fill)"))
     else:
         try:
-            fill = load(HERE / "measure_fill.py", "measure_fill")
-            m = fill.measure(target, gate=args.gate, chrome=args.chrome, want_pdf=args.pdf)
+            m = measure_fill.measure(target, gate=args.gate, chrome=args.chrome, want_pdf=args.pdf)
             low = [r for r in m["pages"] if not r["pass"]]
             note = ", ".join(
                 f"p{r['page']} {r['contentBottom']}px ({r['fillPct']}%)" for r in m["pages"])
